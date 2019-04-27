@@ -3,6 +3,7 @@ package com.hedera.hashgraph.sdk.crypto.mnemonic;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 class WordList {
 
@@ -17,7 +18,7 @@ class WordList {
     }
 
     // fixme: lazy initialization?
-    private static final ArrayList<String> english = (ArrayList<String>) Collections.synchronizedList(Arrays.asList(
+    private static final List<String> english = Collections.synchronizedList(Arrays.asList(
         "abandon",
         "ability",
         "able",

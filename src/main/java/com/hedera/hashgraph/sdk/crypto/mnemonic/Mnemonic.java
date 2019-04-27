@@ -1,7 +1,7 @@
 package com.hedera.hashgraph.sdk.crypto.mnemonic;
 
-import org.bouncycastle.crypto.digests.SHA256Digest;
-
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.StringJoiner;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -10,15 +10,21 @@ public class Mnemonic {
 
     private final byte[] entropy;
     private final String phrase;
+    
+    // fixme: needs to handle groups of 11bits instead of bytes.
 
-    public Mnemonic() {
-        var bytes = new byte[numBytes];
+    private String phraseFromEntropy(byte[] entropy) {
+        System.out.println("WHAT THE FSDVCSFVSDF " + entropy);
+        //var chksumByte = new SHA256Digest(entropy).getEncodedState()[0];
+        byte chksumByte = 0;
 
-        ThreadLocalRandom.current().nextBytes(bytes);
+        try {
+            var digest = MessageDigest.getInstance("SHA-256");
 
-        this.entropy = bytes;
-
-        var chksumByte = new SHA256Digest(entropy).getEncodedState()[0];
+            chksumByte = digest.digest(entropy)[0];
+        } catch (NoSuchAlgorithmException e) {
+            // This can never happen so ignore it
+        }
 
         var phraseJoiner = new StringJoiner(" ");
 
@@ -28,7 +34,21 @@ public class Mnemonic {
 
         phraseJoiner.add(WordList.getWord(chksumByte));
 
-        phrase = phraseJoiner.toString();
+        return phraseJoiner.toString();
+    }
+
+    public Mnemonic(byte[] entropy) {
+        this.entropy = entropy;
+        this.phrase = phraseFromEntropy(entropy);
+    }
+
+    public Mnemonic() {
+        var bytes = new byte[numBytes];
+
+        ThreadLocalRandom.current().nextBytes(bytes);
+
+        this.entropy = bytes;
+        this.phrase = phraseFromEntropy(entropy);
     }
 
     public byte[] getEntropy() {
